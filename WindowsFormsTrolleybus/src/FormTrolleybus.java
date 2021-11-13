@@ -6,19 +6,19 @@ import javax.swing.JButton;
 import java.util.Random;
 
 public class FormTrolleybus {
-    private Trolleybus trolleybus = new Trolleybus();
+    private ITransport bus;
 
     private JPanel pictureBox;
     private Graphics g;
 
     private void Draw() {
-        trolleybus.DrawTransport(g);
+        bus.DrawTransport(g);
     }
 
     public FormTrolleybus() {
         JFrame frame = new JFrame("Троллейбус");
         frame.setLayout(null);
-        frame.setSize(900, 600);
+        frame.setSize(1200, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Создание окна, где будет рисоваться изображение
@@ -29,11 +29,17 @@ public class FormTrolleybus {
         pictureBox.setVisible(true);
 
         //Кнопки на форме
-        JButton buttonCreate = new JButton("Создать");
-        buttonCreate.setBackground(Color.WHITE);
-        buttonCreate.setLocation(775, 10);
-        buttonCreate.setSize(100, 20);
-        buttonCreate.setVisible(true);
+        JButton buttonCreateTrolleybus = new JButton("Создать тролейбус");
+        buttonCreateTrolleybus.setBackground(Color.WHITE);
+        buttonCreateTrolleybus.setLocation(755, 10);
+        buttonCreateTrolleybus.setSize(150, 50);
+        buttonCreateTrolleybus.setVisible(true);
+
+        JButton buttonCreateBus = new JButton("Создать Автобус");
+        buttonCreateBus.setBackground(Color.WHITE);
+        buttonCreateBus.setLocation(910, 10);
+        buttonCreateBus.setSize(150, 50);
+        buttonCreateBus.setVisible(true);
 
         JButton buttonUp = new JButton();
         buttonUp.setLocation(800, 360);
@@ -68,14 +74,25 @@ public class FormTrolleybus {
 
 
         // Логика кнопок
-        buttonCreate.addActionListener(new ActionListener() {
+        buttonCreateTrolleybus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 g = pictureBox.getGraphics();
                 pictureBox.update(g);
                 Random rn = new Random();
-                trolleybus.Init(rn.nextInt(100) + 200, rn.nextInt(1000) + 1000, new Color(255, 165, 0),
-                        new Color(0,0,0), true, true, true,  rn.nextInt(3) +1);
-                trolleybus.SetPosition(rn.nextInt(90) + 10, rn.nextInt(90) + 10, pictureBox.getWidth(), pictureBox.getHeight());
+                bus = new Trolleybus(rn.nextInt(100) + 200, rn.nextInt(1000) + 1000, new Color(255, 165, 0),
+                        new Color(0,0,0), true, true, true, rn.nextInt(3) +1, rn.nextInt(3) +1);
+                bus.SetPosition(rn.nextInt(90) + 10, rn.nextInt(90) + 10, pictureBox.getWidth(), pictureBox.getHeight());
+                Draw();
+            }
+        });
+
+        buttonCreateBus.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                g = pictureBox.getGraphics();
+                pictureBox.update(g);
+                Random rnd = new Random();
+                bus = new Bus(rnd.nextInt(100) + 200, rnd.nextInt(1000) + 1000, new Color(255, 165, 0));
+                bus.SetPosition(rnd.nextInt(90) + 10, rnd.nextInt(90) + 10, pictureBox.getWidth(), pictureBox.getHeight());
                 Draw();
             }
         });
@@ -83,7 +100,7 @@ public class FormTrolleybus {
         buttonUp.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 pictureBox.update(g);
-                trolleybus.MoveTransport(Direction.Up);
+                bus.MoveTransport(Direction.Up);
                 Draw();
             }
         });
@@ -91,7 +108,7 @@ public class FormTrolleybus {
         buttonDown.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 pictureBox.update(g);
-                trolleybus.MoveTransport(Direction.Down);
+                bus.MoveTransport(Direction.Down);
                 Draw();
             }
         });
@@ -99,7 +116,7 @@ public class FormTrolleybus {
         buttonRight.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 pictureBox.update(g);
-                trolleybus.MoveTransport(Direction.Right);
+                bus.MoveTransport(Direction.Right);
                 Draw();
             }
         });
@@ -107,7 +124,7 @@ public class FormTrolleybus {
         buttonLeft.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 pictureBox.update(g);
-                trolleybus.MoveTransport(Direction.Left);
+                bus.MoveTransport(Direction.Left);
                 Draw();
             }
         });
@@ -116,7 +133,8 @@ public class FormTrolleybus {
         frame.add(buttonDown);
         frame.add(buttonRight);
         frame.add(buttonLeft);
-        frame.add(buttonCreate);
+        frame.add(buttonCreateTrolleybus);
+        frame.add(buttonCreateBus);
         frame.add(pictureBox);
         frame.setVisible(true);
     }
