@@ -1,10 +1,11 @@
 import java.awt.*;
 import javax.swing.*;
 
-public class BarbellAdd {
+public class BarbellAdd implements IBarbell{
 
     private Barbell barbell;
 
+    @Override
     public void setBarbell(int volue)
     {
         if (volue == 1)
@@ -21,6 +22,7 @@ public class BarbellAdd {
         }
     }
 
+    @Override
     public void DrawBarbell(Graphics g, Color color,  int x, int y) {
         switch (barbell) {
             case One:
@@ -35,5 +37,6 @@ public class BarbellAdd {
                 g.drawLine(x + 85, y + 48, x + 35, y + 18);
                 break;
         }
+
     }
 }
