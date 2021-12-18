@@ -4,14 +4,25 @@ import javax.swing.*;
 import javax.swing.JButton;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+import java.util.Stack;
 
 public class FormBusStation {
 
-    private BusStation<Bus, IBarbell> busStation;
+    private BusStation<ITransport, IBarbell> busStation;
+
+    private BusStationCollection busStationCollection;
 
     BufferedImage bufferedImage;
     FormImage busStationImage;
     private Graphics g;
+
+    //ListBox
+    private JList<BusStation<ITransport, IBarbell>> listBoxBusStation;
+
+    //Для листБокса
+    private DefaultListModel<String> busStationList;
+
+    Stack<ITransport> stack;
 
     private void Draw() {
         g = bufferedImage.createGraphics();
@@ -29,14 +40,45 @@ public class FormBusStation {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         busStationImage = new FormImage();
-        busStationImage.setSize(674, 500);
+        busStationImage.setSize(674, 470);
         busStationImage.setLocation(0, 0);
 
+        busStationCollection = new BusStationCollection(busStationImage.getWidth(), busStationImage.getHeight());
         bufferedImage = new BufferedImage(busStationImage.getWidth(), busStationImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+        JLabel labelBusStation = new JLabel("Автовокзалы");
+        labelBusStation.setBounds(730, 22, 100, 17);
+        labelBusStation.setVisible(true);
+
+        JTextField textFieldNewLevelName = new JTextField();
+        textFieldNewLevelName.setLocation(680, 40);
+        textFieldNewLevelName.setSize(170, 22);
+        textFieldNewLevelName.setVisible(true);
+
+        JButton buttonAddBusStation = new JButton("Добавить автовокзал");
+        buttonAddBusStation.setBackground(Color.WHITE);
+        buttonAddBusStation.setLocation(680, 70);
+        buttonAddBusStation.setSize(170, 50);
+        buttonAddBusStation.setVisible(true);
+
+
+        //ListBox "JList"
+        busStationList = new DefaultListModel<>();
+
+        listBoxBusStation = new JList<>();
+        listBoxBusStation.setBounds(680, 130,170,110);
+        listBoxBusStation.setVisible(true);
+        listBoxBusStation.setModel(busStationCollection.modelList);
+
+        //Кнопка "Удалить депо"
+        JButton buttonDelBusStation = new JButton("Удалить автовокзал");
+        buttonDelBusStation.setBackground(Color.WHITE);
+        buttonDelBusStation.setBounds(680, 250,170,35);
+        buttonDelBusStation.setVisible(true);
 
         JButton buttonSetBus = new JButton("Добавить автобус");
         buttonSetBus.setBackground(Color.WHITE);
-        buttonSetBus.setLocation(680, 292);
+        buttonSetBus.setLocation(680, 290);
         buttonSetBus.setSize(170, 24);
         buttonSetBus.setVisible(true);
 
@@ -52,6 +94,13 @@ public class FormBusStation {
         buttonTake.setSize(170, 45);
         buttonTake.setVisible(true);
 
+        stack = new Stack<>();
+
+        //Кнопка "Взять из стека"
+        JButton buttonFromStack = new JButton("Взять из стека");
+        buttonFromStack.setBackground(Color.WHITE);
+        buttonFromStack.setBounds(680,475,170,20);
+
         JLabel labelTakeBus = new JLabel("Забрать автобус");
         labelTakeBus.setBounds(720, 381, 100, 17);
         labelTakeBus.setVisible(true);
@@ -65,6 +114,8 @@ public class FormBusStation {
         textFieldPlace.setSize(124, 22);
         textFieldPlace.setVisible(true);
 
+        busStation = new BusStation<ITransport,IBarbell>(busStationImage.getWidth(), busStationImage.getHeight());
+
         buttonSetBus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Color mColor = JColorChooser.showDialog(frame, "Color Chooser", Color.green);
@@ -74,11 +125,12 @@ public class FormBusStation {
                     if (num != -1) {
                         Draw();
                     } else {
-                        JOptionPane.showMessageDialog(frame, "Bus Station is Full!");
+                        JOptionPane.showMessageDialog(frame, "Автовокзал заполнен!");
                     }
                 }
             }
         });
+
 
         buttonSetTrolleybus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -92,33 +144,101 @@ public class FormBusStation {
                         if (busStation.add(trolleybus) != -1) {
                             Draw();
                         } else {
-                            JOptionPane.showMessageDialog(frame, "Bus Station is Full!");
+                            JOptionPane.showMessageDialog(frame, "Автовокзал заполнен!");
                         }
                     }
                 }
             }
         });
 
-        buttonTake.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (textFieldPlace.getText() != "") {
-                    int place;
-                    try {
-                        place = Integer.parseInt(textFieldPlace.getText());
-                    } catch (NumberFormatException ex) {
-                        return;
-                    }
-
-                    ITransport bus = busStation.del(place);
-                    if (bus != null) {
-                        FormTrolleybus form = new FormTrolleybus();
-                        form.SetBus(bus);
-                    }
-                    Draw();
+        buttonTake.addActionListener(e ->
+        {
+            if (textFieldPlace.getText() != "")
+            {
+                int place;
+                try
+                {
+                    place = Integer.parseInt(textFieldPlace.getText());
+                } catch (NumberFormatException ex)
+                {
+                    return;
                 }
+
+                ITransport bus = busStation.del(place);
+                if (bus != null)
+                {
+                    stack.add(bus);
+                }
+                Draw();
             }
         });
 
+        listBoxBusStation.getSelectionModel().addListSelectionListener(e ->
+        {
+            busStation = listBoxBusStation.getSelectedValue();
+            if (busStation == null) frame.getGraphics().clearRect(0, 0, busStationImage.getWidth(), busStationImage.getHeight());
+            else Draw();
+        });
+
+        buttonFromStack.addActionListener(e ->
+        {
+            ITransport bus = null;
+            if (!stack.isEmpty())
+            {
+                bus = stack.pop();
+            }
+            if(bus != null){
+                FormTrolleybus removedBus = new FormTrolleybus();
+                removedBus.SetBus(bus);
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "Стэк пустой");
+            }
+            Draw();
+        });
+
+        buttonAddBusStation.addActionListener(e ->
+        {
+            if (textFieldNewLevelName.getText().isEmpty())
+            {
+                JOptionPane.showMessageDialog(null, "Сначала введите имя автовокзала");
+            } else
+            {
+                if (busStationCollection.AddBusStation(textFieldNewLevelName.getText()) != null)
+                {
+                    Draw();
+                } else
+                {
+                    JOptionPane.showMessageDialog(frame, "Автовокзал с таким именем был создан");
+                }
+                textFieldNewLevelName.setText("");
+            }
+        });
+
+
+        buttonDelBusStation.addActionListener((e) ->
+        {
+            if (busStationCollection.modelList.indexOf(busStation) > -1)
+            {
+                int a = JOptionPane.showConfirmDialog(frame, "Удалить автовокзал <" +
+                        listBoxBusStation.getSelectedValue() + ">", "Удаление", JOptionPane.YES_NO_OPTION);
+                if(a == 0)
+                {
+                    busStationCollection.DelBusStation(busStationCollection.modelList.get(busStationCollection.modelList.indexOf(busStation)).getName());
+                    busStationImage.getGraphics().clearRect(0, 0, busStationImage.getWidth(), busStationImage.getHeight());
+                }
+            } else
+            {
+                JOptionPane.showMessageDialog(null, "Коллекция автовокзалов пуста!");
+            }
+        });
+
+        frame.add(buttonDelBusStation);
+        frame.add(buttonFromStack);
+        frame.add(listBoxBusStation);
+        frame.add(buttonAddBusStation);
+        frame.add(textFieldNewLevelName);
+        frame.add(labelBusStation);
         frame.add(buttonSetBus);
         frame.add(buttonSetTrolleybus);
         frame.add(labelTakeBus);
@@ -129,7 +249,6 @@ public class FormBusStation {
 
         frame.setVisible(true);
 
-        busStation = new BusStation<>(busStationImage.getWidth(), busStationImage.getHeight());
         Draw();
     }
 }

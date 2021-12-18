@@ -1,9 +1,13 @@
-import javax.swing.*;
 import java.awt.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class BusStation<T extends ITransport, U extends IBarbell> {
     // Массив объектов, которые храним
-    private final T[] _places;
+    private final List<T> _places;
+
+    //Максимальное кол-во мест в автовокзале
+    private final int _maxCount;
 
     // Ширина окна отрисовки
     private final int pictureWidth;
@@ -17,6 +21,8 @@ public class BusStation<T extends ITransport, U extends IBarbell> {
     // Высота места автовокзала
     private final int _placeSizeHeight = 110;
 
+    private String name;
+
     private int width;
     private int height;
 
@@ -25,7 +31,8 @@ public class BusStation<T extends ITransport, U extends IBarbell> {
     {
         width = picWidth / _placeSizeWidth;
         height = picHeight / _placeSizeHeight;
-        _places = (T[]) new ITransport[width * height];
+        _maxCount = width * height;
+        _places =  new LinkedList<>();
         pictureWidth = picWidth;
         pictureHeight = picHeight;
     }
@@ -33,22 +40,16 @@ public class BusStation<T extends ITransport, U extends IBarbell> {
     // Перегрузка оператора сложения
     public int add(T bus)
     {
-        int i = 0;
-        int j = 0;
-        while (i < height)
+        if(_places.size() >= _maxCount){
+            return -1;
+        }
+        for (int i = 0; i < _maxCount; i++)
         {
-            j = 0;
-            while (j < width)
+            if (!_places.contains(bus))
             {
-                if (_places[i * width + j] == null)
-                {
-                    _places[i * width + j] = bus;
-                    bus.SetPosition(35 + j * _placeSizeWidth, 7 + i * _placeSizeHeight, pictureWidth, pictureHeight);
-                    return i * width + j;
-                }
-                j++;
+                _places.add(bus);
+                return i;
             }
-            i++;
         }
         return -1;
     }
@@ -56,59 +57,66 @@ public class BusStation<T extends ITransport, U extends IBarbell> {
     // Перегрузка оператора вычитания
     public T del(int index)
     {
-        if ((index >= width * height) || (_places[index] == null))
+        if (index < -1 || index > _places.size())
         {
             return null;
         }
-        if (_places[index] != null)
+        if (_places.size() <= _maxCount)
         {
-            T obj = _places[index];
-            _places[index] = null;
+            T obj = _places.get(index);
+            _places.remove(index);
             return obj;
-        } else
-        {
-            return null;
         }
+        return null;
     }
 
-    public boolean less(BusStation<T, U> p, Trolleybus bus)
+    public boolean less(Trolleybus bus)
     {
         int minNum = Integer.MAX_VALUE;
-        for (int i = 0; i < p._places.length; i++)
+        for (int i = 0; i < _places.size(); i++)
         {
-            if (_places[i] != null)
+            if (_places.get(i) != null)
             {
-                if (_places[i].hashCode() < minNum) minNum = _places[i].hashCode();
+                if (_places.get(i).hashCode() < minNum) minNum = _places.get(i).hashCode();
             }
         }
         if (bus.hashCode() < minNum) return true;
         return false;
     }
 
-    public boolean more(BusStation<T, U> p, Trolleybus bus)
+    public boolean more(Trolleybus bus)
     {
         int maxNum = Integer.MIN_VALUE;
-        for (int i = 0; i < p._places.length; i++)
+        for (int i = 0; i < _places.size(); i++)
         {
-            if (_places[i] != null)
+            if (_places.get(i) != null)
             {
-                if (_places[i].hashCode() > maxNum) maxNum = _places[i].hashCode();
+                if (_places.get(i).hashCode() > maxNum) maxNum = _places.get(i).hashCode();
             }
         }
         if (bus.hashCode() > maxNum) return true;
         return false;
     }
 
+    public String getName() {
+        return name;
+    }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String toString() {
+        return name;
+    }
     public void Draw(Graphics g)
     {
         DrawMarking(g);
-        for (int i = 0; i < _places.length; i++)
+        for (int i = 0; i < _places.size(); i++)
         {
-            if (_places[i] != null)
-            {
-                _places[i].DrawTransport(g);
-            }
+            _places.get(i).SetPosition(35 + i % 3 * _placeSizeWidth, i / 3 * _placeSizeHeight + 7, pictureWidth, pictureHeight);;
+            _places.get(i).DrawTransport(g);
+
         }
     }
 
@@ -116,7 +124,6 @@ public class BusStation<T extends ITransport, U extends IBarbell> {
     private void DrawMarking(Graphics g)
     {
         g.setColor(Color.BLACK);
-
         for (int i = 0; i < pictureWidth / _placeSizeWidth; i++)
         {
             for (int j = 0; j < pictureHeight / _placeSizeHeight + 1; ++j)
@@ -127,5 +134,12 @@ public class BusStation<T extends ITransport, U extends IBarbell> {
             g.drawLine(i * _placeSizeWidth + 5, 10, i * _placeSizeWidth + 5,
                     (pictureHeight / _placeSizeHeight) * _placeSizeHeight + 10);
         }
+    }
+
+    //Индексатор для получения элемента из списка
+    public T indexer(int ind)
+    {
+        if (ind > -1 && ind < _places.size()) return _places.get(ind);
+        else return null;
     }
 }
