@@ -204,7 +204,6 @@ public class FormBusStation {
                 JOptionPane.showMessageDialog(null, "Сначала введите имя автовокзала");
             } else
             {
-
                 if (busStationCollection.AddBusStation(textFieldNewLevelName.getText()) != null)
                 {
                     Draw();
@@ -219,20 +218,20 @@ public class FormBusStation {
 
         buttonDelBusStation.addActionListener((e) ->
         {
-            if(listBoxBusStation.getSelectedIndex() > -1)
+            if (busStationCollection.modelList.indexOf(busStation) > -1)
             {
-                int a = JOptionPane.showConfirmDialog(frame, "Удалить депо <" +
+                int a = JOptionPane.showConfirmDialog(frame, "Удалить автовокзал <" +
                         listBoxBusStation.getSelectedValue() + ">", "Удаление", JOptionPane.YES_NO_OPTION);
                 if(a == 0)
                 {
-                    busStationCollection.DelBusStation(listBoxBusStation.getSelectedValue().toString());
-                    ReloadLevels();
+                    busStationCollection.DelBusStation(busStationCollection.modelList.get(busStationCollection.modelList.indexOf(busStation)).getName());
+                    busStationImage.getGraphics().clearRect(0, 0, busStationImage.getWidth(), busStationImage.getHeight());
                 }
+            } else
+            {
+                JOptionPane.showMessageDialog(null, "Коллекция автовокзалов пуста!");
             }
         });
-
-
-
 
         frame.add(buttonDelBusStation);
         frame.add(buttonFromStack);
@@ -250,30 +249,6 @@ public class FormBusStation {
 
         frame.setVisible(true);
 
-        Draw();
-    }
-
-    private void ReloadLevels()
-    {
-        int index = listBoxBusStation.getSelectedIndex();
-        busStationList.removeAllElements();
-
-        int i = 0;
-        for(String name: busStationCollection.Keys())
-        {
-            busStationList.add(i, name);
-            i++;
-        }
-
-        int count = busStationList.size();
-        if(count > 0 && (index < 0 || index >= count))
-        {
-            listBoxBusStation.setSelectedIndex(0);
-        }
-        else if(index > -1 && index < count)
-        {
-            listBoxBusStation.setSelectedIndex(index);
-        }
         Draw();
     }
 }

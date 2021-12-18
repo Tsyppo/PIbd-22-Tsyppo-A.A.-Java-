@@ -49,7 +49,9 @@ public class BusStationCollection {
     public void DelBusStation(String name)
     {
         if(busStationStages.containsKey(name)){
+            BusStation busStation = busStationStages.get(name);
             busStationStages.remove(name);
+            modelList.removeElement(busStation);
         }
     }
 
