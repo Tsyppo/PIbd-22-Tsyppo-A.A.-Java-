@@ -13,7 +13,7 @@ public class BusStationCollection {
         return busStationStages.keySet();
     }
 
-    // Возвращение списка названий мест гавани
+    // Возвращение списка названий мест автовокзала
     public DefaultListModel<BusStation<ITransport, IBarbell>> modelList;
 
     //Ширина окна отрисовки
